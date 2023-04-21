@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthGPT</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="./public/gto.png" type="image/x-icon">
+</head>
+<body>
+    <main>
+        <div class="main_Container">
+            <img class="gto_img" src="./public/gto.png" alt="Logo GTO">
+            <h1 class="main_title">Triage Guanajuato</h1>
+            <h2 class="main_subtitle">Estás hablando con HealthGPT</h2>        
+            <div id="chat-log"></div>
+            <form id="form" class="main_form" action="/" method="post">
+                    <input 
+                        class="main_input" 
+                        type="text" 
+                        name="message" 
+                        id="message"
+                        placeholder="Indique sus sintomas"
+                    >
+                    <button 
+                        class="main_button" type="submit">Enviar</button>
+                </form>
+            <div class={botonHealthProvider_container}>
+                <button 
+                class="botonHealthProvider"
+                type="button"
+                onclick=""
+
+                >Chatear con un medico</button>
+              </div>
+        </div>
+    </main>
+    <footer class={footer}>
+        <div class={footerContainer}>
+          <p class="footer_text">Desarrollado por Diego Lerma para el <b>Día de la Mentefactura </b> 2023 🧠👈 Guanajuato, Gto</p>
+          <p class="footer_subtext">Potenciado por un modelo reentrenado de ChatGPT para salud</p>
+        </div>
+      </footer>
+
+    <script>
+
+// Hacer focus en el input al cargar la página
+document.addEventListener("DOMContentLoaded", function(event) {
+  document.getElementById("message").focus();
+});
+
+        let messages=[]
+        const chatlog=document.getElementById('chat-log')
+        const message=document.getElementById('message')
+        const form=document.getElementById('form')
+        form.addEventListener('submit', (e)=>{
+            e.preventDefault()
+            const messageText=message.value
+            const newMessage={"role": "user", "content": `${messageText}`}
+            messages.push(newMessage)
+            message.value=''
+            const messageElement=document.createElement('div')
+            messageElement.classList.add('message')
+            messageElement.classList.add('message--sent')
+            messageElement.innerHTML=`
+                <div class="message__text">${messageText}</div>`
+            chatlog.appendChild(messageElement)
+            chatlog.scrollTop=chatlog.scrollHeight
+            fetch('http://localhost:3000', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    messages
+                })
+            })
+            .then(res=>res.json())
+            .then(data=>{
+                let newAssistantMessage={"role": "assistant", "content": `${data.completion.content}`}
+                messages.push(newAssistantMessage)
+                const messageElement=document.createElement('div')
+                messageElement.classList.add('message')
+                messageElement.classList.add('message--received')
+                messageElement.innerHTML=`
+                <div class="message__text">${data.completion.content}</div>`
+            chatlog.appendChild(messageElement)
+            chatlog.scrollTop=chatlog.scrollHeight
+            })
+            })
+    </script>
+</body>
+</html>
